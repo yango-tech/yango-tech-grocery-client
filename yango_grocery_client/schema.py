@@ -4,6 +4,20 @@ from typing import Any, Literal
 import io
 
 
+"""
+The class was added for clarity. Do not use it in other schemas.
+Any random value can come from the API, this will break the transformation.
+
+class YangoMarkCountUnitList(str, Enum):
+    UNIT = 'unit'
+    GRAM = 'gram'
+    KG = 'kilogram'
+    LITER = 'liter'
+    MILLILITRE = 'millilitre'
+    # truly can be anything
+"""
+
+
 class YangoOrderState(str, Enum):
     DRAFT = 'draft'
     CANCELED = 'canceled'
@@ -28,26 +42,17 @@ class YangoOrderPickingState(str, Enum):
     FAILED = 'failed'
     CANCELED = 'canceled'
 
-class YangoPriceListStatus(str, Enum):
-    ACTIVE = 'active'
-    REMOVED = 'removed'
 
 class YangoOrderEventType(str, Enum):
     STATE_CHANGE = 'state_change'
     NEW_ORDER = 'new_order'
     RECEIPT_ISSUED = 'receipt_issued'
 
+
 class YangoTypeAccounting(str, Enum):
     TRUE_WEIGHT = 'byTrueWeight'
     UNIT = 'byUnit'
     WEIGHT = 'byWeight'
-
-class YangoMarkCountUnitList(str, Enum):
-    UNIT = 'unit'
-    GRAM = 'gram'
-    KG = 'kilogram'
-    LITER = 'liter'
-    MILLILITRE = 'millilitre'
 
 
 class YangoNomenclatureType(str, Enum):
@@ -58,6 +63,11 @@ class YangoProductStatus(str, Enum):
     ACTIVE = 'active'
     DISABLED = 'disabled'
     ARCHIVED = 'archived'
+
+
+class YangoPriceListStatus(str, Enum):
+    ACTIVE = 'active'
+    REMOVED = 'removed'
 
 
 class YangoMediaType(str, Enum):
@@ -205,6 +215,7 @@ class YangoReceiptPaymentAmount:
 class YangoReceiptItemPayment:
     quantity: str
     discount: str
+    discount_amount: str = '0'
     payment_amounts: list[YangoReceiptPaymentAmount]
     barcode: str | None = None
 
@@ -244,13 +255,18 @@ class YangoPaymentMethod:
     payment_type: str # cash, online, apple_pay, etc
 
 
+class YangoReceiptType(str, Enum):
+    PAYMENT = 'payment'
+    REFUND = 'refund'
+
+
 @dataclass(kw_only=True)
 class YangoReceiptRecord:
     receipt_id: str
     order: YangoReceiptOrder
     create_time: str
     store: YangoReceiptStore
-    receipt_type: str # payment, refund
+    receipt_type: YangoReceiptType | str
     payment_methods: dict[str, YangoPaymentMethod]
     items: dict[str, YangoReceiptProductItem | YangoReceiptNotProductItem]
     client: YangoReceiptClient | None = None
@@ -261,11 +277,14 @@ class YangoGetReceiptResponse:
     receipts: list[YangoReceiptRecord]
 
 
-
 @dataclass
-class YangoPriceListData:
+class YangoPriceListUpdateData:
     id: str
     name: str
+
+
+@dataclass
+class YangoPriceListData(YangoPriceListUpdateData):
     status: YangoPriceListStatus
 
 
@@ -287,13 +306,13 @@ class YangoStorePriceLinkData:
 class YangoCustomAttributes:
     longName: dict[str, str]
     shortNameLoc: dict[str, str]
-    markCount: int
-    markCountUnitList: YangoMarkCountUnitList
+    markCount: float
+    markCountUnitList: str # YangoMarkCountUnitList
     barcode: list[str] = field(default_factory=list[str])
     images: list[str] | None = None
     descriptionLoc: dict[str, str] | None = None
-    nomenclatureType: YangoNomenclatureType | None = None
-    typeAccounting: YangoTypeAccounting | None = None
+    nomenclatureType: YangoNomenclatureType | str | None = None
+    typeAccounting: YangoTypeAccounting | str | None = None
     extraAttributes: dict[str, Any] | None = None
 
 
@@ -302,7 +321,7 @@ class YangoProductData:
     custom_attributes: YangoCustomAttributes
     master_category: str
     product_id: str
-    status: YangoProductStatus
+    status: YangoProductStatus | str
     is_meta: bool
 
 

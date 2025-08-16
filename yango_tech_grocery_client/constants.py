@@ -26,3 +26,5 @@ WMS_PICKING_EVENTS = set(['reserving', 'approving', 'processing', 'complete'])
 LOGISTIC_DELIVERY_EVENTS = set(['delivering', 'delivered'])
 
 REAL_MONEY_PAYMENT_METHODS = ('cash', 'online', 'card', 'apple_pay')
+
+DEFAULT_DOMAIN = "https://api.retailtech.yango.com"

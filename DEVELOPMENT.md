@@ -41,56 +41,18 @@ This document contains instructions for developers who want to contribute to or 
    pip install dist/yango_tech_grocery_client-*.whl
    ```
 
-### Using setuptools
-
-1. **Build the package:**
-   ```bash
-   python -m build
-   ```
-
-2. **Install the built package locally:**
-   ```bash
-   pip install dist/yango_tech_grocery_client-*.whl
-   ```
-
 ## Development Workflow
-
-1. **Run tests:**
-   ```bash
-   poetry run pytest
-   ```
 
 2. **Run type checking:**
    ```bash
    poetry run mypy yango_tech_grocery_client/
    ```
 
-3. **Format code:**
+3. **Lint and Format code:**
    ```bash
    poetry run black .
    poetry run isort .
-   ```
-
-4. **Lint code:**
-   ```bash
    poetry run flake8
-   ```
-
-## Publishing to PyPI
-
-1. **Build the package:**
-   ```bash
-   poetry build
-   ```
-
-2. **Upload to PyPI (TestPyPI for testing):**
-   ```bash
-   poetry run twine upload --repository testpypi dist/*
-   ```
-
-3. **Upload to PyPI (production):**
-   ```bash
-   poetry run twine upload dist/*
    ```
 
 ## Version Management
@@ -103,10 +65,7 @@ The package version is managed in `pyproject.toml`. To update the version:
    ```
 
 2. **Build and publish:**
-   ```bash
-   poetry build
-   poetry run twine upload dist/*
-   ```
+   Package build and uploading to PyPi is performed in github actions by package maintainer
 
 ## Contributing
 

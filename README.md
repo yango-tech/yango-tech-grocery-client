@@ -53,8 +53,6 @@ For comprehensive examples, see [EXAMPLES.md](EXAMPLES.md).
 client = YangoClient(
     domain="https://api.retailtech.yango.com",  # API domain
     auth_token="your_auth_token",           # Authentication token
-    error_handler=custom_error_handler,     # Optional custom error handler
-    proxy="http://proxy.example.com:8080"   # Optional proxy configuration
 )
 ```
 
@@ -69,5 +67,5 @@ export YANGO_AUTH_TOKEN="your_auth_token"
 
 ## Documentation
 
-- **[EXAMPLES.md](EXAMPLES.md)** - Comprehensive usage examples
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development and contribution guide
+- **[EXAMPLES.md](https://github.com/yango-tech/yango-tech-grocery-client/blob/main/EXAMPLES.md)** - Comprehensive usage examples
+- **[DEVELOPMENT.md](https://github.com/yango-tech/yango-tech-grocery-client/blob/main/DEVELOPMENT.md)** - Development and contribution guide

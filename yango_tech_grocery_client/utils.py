@@ -2,14 +2,14 @@ from typing import Any, Awaitable, Callable, TypeVar, ParamSpec
 from functools import wraps
 from .exceptions import YangoBadRequest, YangoRequestError
 from .constants import ERROR_STATUSES_FOR_RETRY, MAX_RETRIES, SERVICE_NAME, RETRY_DELAY
-from logger.logger import get_logger
+import logging
 import asyncio
 
 
 P = ParamSpec('P')
 R = TypeVar('R')
 
-logger = get_logger(SERVICE_NAME)
+logger = logging.getLogger(SERVICE_NAME)
 
 def retry_request(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
     @wraps(func)

@@ -1,7 +1,7 @@
 from typing import Any, AsyncGenerator
 from dataclasses import asdict
 from dacite import from_dict
-from logger.logger import get_logger
+import logging
 from .endpoints import (
     DISCOUNTS_CREATE_ENDPOINT, PRICE_CREATE_ENDPOINT, PRICE_GET_ENDPOINT,
     PRICE_LIST_CREATE_ENDPOINT, PRICE_SET_ENDPOINT, PRICE_UPDATE_ENDPOINT,
@@ -15,7 +15,7 @@ from .schema import (
 )
 from .base_client import BaseYangoClient
 
-logger = get_logger(SERVICE_NAME)
+logger = logging.getLogger(SERVICE_NAME)
 
 def get_price_request_data(price_record: YangoPriceData) -> dict[str, Any]:
     return {

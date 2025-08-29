@@ -2,9 +2,10 @@ from dacite import Config, from_dict
 from dataclasses import asdict, fields
 from enum import Enum
 from typing import Any, AsyncGenerator
+import logging
 
 
-from logger.logger import get_logger
+
 from .endpoints import (
     LOGISTIC_DELIVERY_SET_STATE_ENDPOINT, ORDER_CANCEL_ENDPOINT,
     ORDER_CREATE_ENDPOINT, ORDER_DETAIL_ENDPOINT, ORDER_UPDATE_ENDPOINT, ORDERS_EVENTS_QUERY_ENDPOINT,
@@ -26,7 +27,7 @@ from .schema import (
 from .prices import YangoPricesClient
 
 
-logger = get_logger(SERVICE_NAME)
+logger = logging.getLogger(SERVICE_NAME)
 
 
 

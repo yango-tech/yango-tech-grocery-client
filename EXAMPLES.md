@@ -16,7 +16,7 @@ async def main():
         domain="https://api.retailtech.yango.com",
         auth_token="your_auth_token_here"
     )
-    
+
     # Your API calls here
     stores = await client.get_stores()
     print(f"Found {len(stores)} stores")
@@ -36,7 +36,7 @@ from yango_grocery_client import YangoClient, YangoOrderRecord, YangoShoppingCar
 
 async def create_order_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Create shopping cart items
     cart_items = [
         YangoShoppingCartItem(
@@ -47,7 +47,7 @@ async def create_order_example():
             vat="20.00"
         )
     ]
-    
+
     # Create order record
     order = YangoOrderRecord(
         order_id="order_456",
@@ -62,7 +62,7 @@ async def create_order_example():
         delivery_fee="50.00",
         payment_method="card"
     )
-    
+
     # Create the order
     result = await client.create_order(order)
     print(f"Order created: {result}")
@@ -73,7 +73,7 @@ async def create_order_example():
 ```python
 async def get_order_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get order details
     order_detail = await client.get_order_detail("order_456")
     print(f"Order status: {order_detail['status']}")
@@ -85,7 +85,7 @@ async def get_order_example():
 ```python
 async def cancel_order_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Cancel order with reason
     result = await client.cancel_order(
         order_id="order_456",
@@ -99,11 +99,11 @@ async def cancel_order_example():
 ```python
 async def get_orders_state_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get state of multiple orders
     order_ids = ["order_456", "order_789", "order_101"]
     states = await client.get_orders_state(order_ids)
-    
+
     for order_state in states:
         print(f"Order {order_state['order_id']}: {order_state['state']}")
 ```
@@ -115,10 +115,10 @@ async def get_orders_state_example():
 ```python
 async def get_products_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get all active products
     products = await client.get_all_products(only_active=True)
-    
+
     print(f"Found {len(products)} active products")
     for product_id, product in products.items():
         print(f"Product {product_id}: {product.name} - {product.price}")
@@ -131,7 +131,7 @@ from yango_grocery_client import YangoProductData, YangoCustomAttributes
 
 async def create_products_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Create product data
     product = YangoProductData(
         product_id="new_product_123",
@@ -147,7 +147,7 @@ async def create_products_example():
             country_of_origin="Poland"
         )
     )
-    
+
     # Create the product
     await client.create_products([product])
     print("Product created successfully")
@@ -158,7 +158,7 @@ async def create_products_example():
 ```python
 async def get_product_updates_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get product updates (streaming)
     async for product in client.get_product_updates():
         print(f"Product update: {product.product_id} - {product.name}")
@@ -173,13 +173,13 @@ from yango_grocery_client import YangoPriceListUpdateData
 
 async def create_price_lists_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     price_list = YangoPriceListUpdateData(
         id="price_list_123",
         name="Regular Prices",
         status="active"
     )
-    
+
     await client.create_price_lists([price_list])
     print("Price list created")
 ```
@@ -189,11 +189,11 @@ async def create_price_lists_example():
 ```python
 async def get_prices_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get prices for specific price lists
     price_list_ids = ["price_list_123", "price_list_456"]
     prices = await client.get_prices(price_list_ids)
-    
+
     for price_list_id, price_data in prices.items():
         print(f"Price list {price_list_id}:")
         for price in price_data:
@@ -209,14 +209,14 @@ from yango_grocery_client import YangoStockData, YangoStockUpdateMode
 
 async def update_stocks_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Create stock data
     stock = YangoStockData(
         product_id="product_123",
         quantity=100,
         unit="unit"
     )
-    
+
     # Update stocks for a store
     await client.update_stocks(
         wms_store_id="store_789",
@@ -230,7 +230,7 @@ async def update_stocks_example():
 ```python
 async def get_stocks_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get stocks
     stocks = await client.get_stocks()
     print(f"Retrieved {len(stocks['stocks'])} stock records")
@@ -243,10 +243,10 @@ async def get_stocks_example():
 ```python
 async def get_stores_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get all stores
     stores = await client.get_stores()
-    
+
     for store in stores:
         print(f"Store {store.store_id}: {store.name}")
         print(f"  Address: {store.address}")
@@ -260,11 +260,11 @@ async def get_stores_example():
 ```python
 async def upload_receipt_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Upload receipt document (PDF)
     with open("receipt.pdf", "r") as f:
         document_content = f.read()
-    
+
     await client.upload_receipt(
         receipt_id="receipt_123",
         document=document_content
@@ -277,7 +277,7 @@ async def upload_receipt_example():
 ```python
 async def get_receipt_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get receipt details
     receipt = await client.get_receipt("receipt_123")
     print(f"Receipt amount: {receipt.amount}")
@@ -291,10 +291,10 @@ async def get_receipt_example():
 ```python
 async def get_order_events_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     # Get order events
     events_response = await client.get_orders_events_query()
-    
+
     print(f"Next cursor: {events_response.cursor}")
     for event in events_response.orders_events:
         print(f"Order {event.order_id}: {event.data.type} at {event.occurred}")
@@ -303,20 +303,21 @@ async def get_order_events_example():
 ### Error Handling
 
 ```python
-from yango_grocery_client import YangoBadRequest, YangoRequestError
+from yango_grocery_client import YangoRequestError
 
 async def error_handling_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
-    
+
     try:
         # This might fail if order doesn't exist
         order = await client.get_order_detail("non_existent_order")
-    except YangoBadRequest as e:
-        print(f"Bad request error: {e.message}")
-        print(f"Error details: {e.payload}")
     except YangoRequestError as e:
-        print(f"Request error: {e.message}")
+        print(f"Bad request error: {e.message}")
         print(f"Status code: {e.status}")
+        print(f"Error details: {e.payload}")
+    except Exception as e:
+        print(f"Request error: {e.message}")
+
 ```
 
 ## Configuration

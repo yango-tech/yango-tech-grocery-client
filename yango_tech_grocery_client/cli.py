@@ -48,9 +48,10 @@ async def get_order_detail(domain: str, auth_token: str, order_id: str) -> None:
     try:
         order = await client.get_order_detail(order_id)
         print(f"Order {order_id}:")
-        print(f"  Status: {order.get('status', 'Unknown')}")
-        print(f"  Total Price: {order.get('total_price', 'Unknown')}")
-        print(f"  Customer: {order.get('customer_name', 'Unknown')}")
+        print(f"  Cart: {order.cart}")
+        print(f"  Delivery Address: {order.delivery_address}")
+        print(f"  Store ID: {order.store_id}")
+        print(f"  Delivery Properties: {order.delivery_properties}")
     except Exception as e:
         print(f"Error getting order details: {e}", file=sys.stderr)
         sys.exit(1)
@@ -68,7 +69,7 @@ Examples:
   %(prog)s order --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --order-id ORDER_123
         """
     )
-    
+
     parser.add_argument(
         "--domain",
         required=True,
@@ -79,12 +80,12 @@ Examples:
         required=True,
         help="Authentication token"
     )
-    
+
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
-    
+
     # Stores command
     subparsers.add_parser("stores", help="Get all stores")
-    
+
     # Products command
     products_parser = subparsers.add_parser("products", help="Get products")
     products_parser.add_argument(
@@ -92,7 +93,7 @@ Examples:
         action="store_true",
         help="Include inactive products"
     )
-    
+
     # Order command
     order_parser = subparsers.add_parser("order", help="Get order details")
     order_parser.add_argument(
@@ -100,13 +101,13 @@ Examples:
         required=True,
         help="Order ID to retrieve"
     )
-    
+
     args = parser.parse_args()
-    
+
     if not args.command:
         parser.print_help()
         sys.exit(1)
-    
+
     # Run the appropriate command
     if args.command == "stores":
         asyncio.run(get_stores(args.domain, args.token))

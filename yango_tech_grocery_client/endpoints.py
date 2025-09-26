@@ -11,10 +11,9 @@ RECEIPTS_UPLOAD_ENDPOINT = '/b2b/v1/receipts/documents/upload'
 WMS_PICKING_SET_STATE_ENDPOINT = '/b2b/v1/wms/picking/set-state'
 LOGISTIC_DELIVERY_SET_STATE_ENDPOINT = '/b2b/v1/logistics/delivery/set-state'
 
-PRICE_CREATE_ENDPOINT = '/b2b/v1/prices/create'
 PRICE_GET_ENDPOINT = '/b2b/v1/prices/get'
-PRICE_UPDATE_ENDPOINT = '/b2b/v1/prices/update'
 PRICE_SET_ENDPOINT = '/b2b/v1/prices/set'
+
 PRICE_LIST_GET_ENDPOINT = '/b2b/v1/pricelists/get'
 PRICE_LIST_CREATE_ENDPOINT = '/b2b/v1/pricelists/create'
 PRICE_LIST_UPDATES_ENDPOINT = '/b2b/v1/pricelists/query'
@@ -33,6 +32,7 @@ STORE_PRICE_LIST_LINK_GET_ENDPOINT = '/b2b/v1/store-pricelist-links/get'
 DISCOUNTS_CREATE_ENDPOINT = '/b2b/v1/discounts/create'
 
 STOCK_UPDATE_ENDPOINT = '/b2b/v1/stocks/update'
+STOCK_INITIALIZE_ENDPOINT = '/b2b/v1/stocks/initialize'
 STOCK_GET_ENDPOINT = '/b2b/v1/stocks/query'
 
 STORES_GET_ENDPOINT = '/b2b/v1/stores/get'

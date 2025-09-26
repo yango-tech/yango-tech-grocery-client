@@ -11,7 +11,7 @@ __email__ = "tech@yango.com"
 from .client import YangoClient
 from .base_client import BaseYangoClient
 from .prices import YangoPricesClient
-from .exceptions import YangoException, YangoRequestError, YangoBadRequest
+from .exceptions import YangoException, YangoRequestError
 
 # Import main schema classes for convenience
 from .schema import (
@@ -22,6 +22,7 @@ from .schema import (
     YangoStockData,
     YangoPriceData,
     YangoOrderState,
+    YangoOrderStateQuery,
     YangoProductStatus,
     YangoStockUpdateMode,
     YangoOrderEvent,
@@ -36,22 +37,22 @@ from .schema import (
 __all__ = [
     # Main client classes
     "YangoClient",
-    "BaseYangoClient", 
+    "BaseYangoClient",
     "YangoPricesClient",
-    
+
     # Exceptions
     "YangoException",
     "YangoRequestError",
-    "YangoBadRequest",
-    
+
     # Schema classes
     "YangoOrderRecord",
-    "YangoShoppingCartItem", 
+    "YangoShoppingCartItem",
     "YangoProductData",
     "YangoStoreRecord",
     "YangoStockData",
     "YangoPriceData",
     "YangoOrderState",
+    "YangoOrderStateQuery",
     "YangoProductStatus",
     "YangoStockUpdateMode",
     "YangoOrderEvent",

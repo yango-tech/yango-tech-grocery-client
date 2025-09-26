@@ -4,7 +4,7 @@ This document contains instructions for developers who want to contribute to or 
 
 ## Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - Poetry (for dependency management)
 
 ## Setup Development Environment

@@ -13,7 +13,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
     For example: `python -m unittest -v src.services.yango.tests.test_rate_limiter`
     """
 
-    async def test_rate_limiter_basic(self):
+    async def test_rate_limiter_basic(self) -> None:
         """
         Test that rate limiter allows up to max_rps requests per second.
         """
@@ -35,7 +35,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         current_rps = limiter.get_current_rps(endpoint, token)
         self.assertEqual(current_rps, max_rps, f"Expected {max_rps} RPS")
 
-    async def test_rate_limiter_exceed_limit(self):
+    async def test_rate_limiter_exceed_limit(self) -> None:
         """Test that rate limiter waits when exceeding the limit"""
         max_rps = 2
         limiter = MethodRateLimiter(max_rps)
@@ -55,7 +55,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(elapsed, 0.9, f"Expected to wait at least 0.9 seconds")
         self.assertLessEqual(elapsed, 1.1, f"Expected to wait at most 1.1 seconds")
 
-    async def test_rate_limiter_multiple_endpoints(self):
+    async def test_rate_limiter_multiple_endpoints(self) -> None:
         """Test that rate limiter works independently for different endpoints"""
         max_rps = 3
         limiter = MethodRateLimiter(max_rps)
@@ -82,7 +82,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(rps1, max_rps, f"Expected {max_rps} RPS for endpoint1")
         self.assertEqual(rps2, max_rps, f"Expected {max_rps} RPS for endpoint2")
 
-    async def test_rate_limiter_multiple_tokens(self):
+    async def test_rate_limiter_multiple_tokens(self) -> None:
         """Test that rate limiter works independently for different tokens on same endpoint"""
         max_rps = 3
         limiter = MethodRateLimiter(max_rps)
@@ -109,7 +109,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(rps1, max_rps, f"Expected {max_rps} RPS for token1")
         self.assertEqual(rps2, max_rps, f"Expected {max_rps} RPS for token2")
 
-    async def test_rate_limiter_cleanup_old_requests(self):
+    async def test_rate_limiter_cleanup_old_requests(self) -> None:
         """Test that old requests are cleaned up properly"""
         max_rps = 2
         limiter = MethodRateLimiter(max_rps)
@@ -134,7 +134,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         current_rps = limiter.get_current_rps(endpoint, token)
         self.assertEqual(current_rps, 1, f"Expected 1 RPS after cleanup")
 
-    async def test_rate_limiter_concurrent_access(self):
+    async def test_rate_limiter_concurrent_access(self) -> None:
         """Test that rate limiter works correctly under concurrent access"""
         max_rps = 3
         limiter = MethodRateLimiter(max_rps)
@@ -152,7 +152,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(elapsed, 0.9, f"Expected to wait at least 0.9 seconds for concurrent access")
         self.assertLessEqual(elapsed, 1.1, f"Expected to wait at most 1.1 seconds for concurrent access")
 
-    async def test_rate_limiter_disabled(self):
+    async def test_rate_limiter_disabled(self) -> None:
         """Test that rate limiter does nothing when disabled"""
         max_rps = 1
         limiter = MethodRateLimiter(max_rps, enabled=False)
@@ -168,7 +168,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         # Should be almost immediate (less than 0.1 seconds)
         self.assertLess(elapsed, 0.1, f"Expected immediate execution when disabled")
 
-    async def test_rate_limiter_precise_waiting(self):
+    async def test_rate_limiter_precise_waiting(self) -> None:
         """Test that rate limiter waits precisely based on request timing"""
         max_rps = 2
         limiter = MethodRateLimiter(max_rps)
@@ -190,7 +190,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(elapsed, 0.9, f"Expected to wait at least 0.9 seconds")
         self.assertLessEqual(elapsed, 1.1, f"Expected to wait at most 1.1 seconds")
 
-    async def test_rate_limiter_immediate_execution_after_partial_window(self):
+    async def test_rate_limiter_immediate_execution_after_partial_window(self) -> None:
         """Test that requests execute immediately if previous second didn't hit RPS limit"""
         max_rps = 5
         limiter = MethodRateLimiter(max_rps)
@@ -218,7 +218,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(total_elapsed, 0.4, f"Expected total time at least 0.4 seconds")
         self.assertLessEqual(total_elapsed, 0.6, f"Expected total time at most 0.6 seconds")
 
-    async def test_rate_limiter_sliding_window_behavior(self):
+    async def test_rate_limiter_sliding_window_behavior(self) -> None:
         """Test that rate limiter properly handles sliding window behavior"""
         max_rps = 3
         limiter = MethodRateLimiter(max_rps)
@@ -247,7 +247,7 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         # This request should execute immediately since the oldest request expired
         self.assertLess(request_elapsed, 0.01, f"Expected immediate execution due to sliding window")
 
-    async def test_rate_limiter_wait_until_next_second(self):
+    async def test_rate_limiter_wait_until_next_second(self) -> None:
         """Test that when there are already max_rps requests in the last second, we wait until the next second"""
         max_rps = 3
         limiter = MethodRateLimiter(max_rps)

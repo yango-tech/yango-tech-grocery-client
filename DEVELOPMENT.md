@@ -4,8 +4,8 @@ This document contains instructions for developers who want to contribute to or 
 
 ## Prerequisites
 
-- Python 3.9 or higher
-- Poetry (for dependency management)
+- Python 3.10 or higher
+- Poetry 2.0.0 or higher (for dependency management)
 
 ## Setup Development Environment
 
@@ -22,7 +22,7 @@ This document contains instructions for developers who want to contribute to or 
 
 3. **Activate the virtual environment:**
    ```bash
-   poetry shell
+   poetry env activate
    ```
 
 ## Building the Package

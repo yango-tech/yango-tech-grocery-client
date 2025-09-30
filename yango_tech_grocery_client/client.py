@@ -4,8 +4,6 @@ from enum import Enum
 from typing import Any, AsyncGenerator
 import logging
 
-
-
 from .endpoints import (
     LOGISTIC_DELIVERY_SET_STATE_ENDPOINT, ORDER_CANCEL_ENDPOINT,
     ORDER_CREATE_ENDPOINT, ORDER_DETAIL_ENDPOINT, ORDER_UPDATE_ENDPOINT, ORDERS_EVENTS_QUERY_ENDPOINT,
@@ -13,16 +11,16 @@ from .endpoints import (
     PRODUCT_MEDIA_CREATE_ENDPOINT,
     PRODUCT_VAT_CREATE_ENDPOINT, PRODUCT_VAT_UPDATE_ENDPOINT, PRODUCT_VAT_GET_ENDPOINT,
     RECEIPTS_GET_ENDPOINT, RECEIPTS_UPLOAD_ENDPOINT,
-    STOCK_GET_ENDPOINT, STOCK_UPDATE_ENDPOINT,
+    STOCK_GET_ENDPOINT, STOCK_INITIALIZE_ENDPOINT, STOCK_UPDATE_ENDPOINT,
     STORES_GET_ENDPOINT, WMS_PICKING_SET_STATE_ENDPOINT,
 )
-from .constants import PRODUCTS_REQUEST_LIMIT, SERVICE_NAME
+from .constants import PRODUCTS_BATCH_SIZE, PRODUCTS_REQUEST_LIMIT, SERVICE_NAME, STOCKS_BATCH_SIZE, VAT_BATCH_SIZE
 from .schema import (
     YangoGetReceiptResponse, YangoOrderRecord, YangoStoreRecord, YangoProductData,
     YangoProductMedia, YangoStockData, YangoStockUpdateMode, YangoProductVat,
     YangoProductStatus, YangoCustomAttributes, YangoOrderEventQueryResponse,
     YangoStateChangeEventData, YangoNewOrderEventData, YangoReceiptIssuedEventData, YangoOrderState, YangoOrderEvent,
-    YangoOrderEventType
+    YangoOrderDetails, YangoOrderEventType, YangoOrderStateQuery
 )
 from .prices import YangoPricesClient
 
@@ -33,11 +31,11 @@ logger = logging.getLogger(SERVICE_NAME)
 
 class YangoClient(YangoPricesClient):
 
-    async def create_order(self, data: YangoOrderRecord):
+    async def create_order(self, data: YangoOrderRecord) -> Any:
         return await self.yango_request(ORDER_CREATE_ENDPOINT, asdict(data))
 
 
-    async def cancel_order(self, order_id: str, reason: str | None = None):
+    async def cancel_order(self, order_id: str, reason: str | None = None) -> Any:
         data = {'order_id': order_id}
 
         if reason:
@@ -45,19 +43,20 @@ class YangoClient(YangoPricesClient):
 
         return await self.yango_request(ORDER_CANCEL_ENDPOINT, data)
 
-
-    async def update_order(self, data: YangoOrderRecord):
+    async def update_order(self, data: YangoOrderRecord) -> Any:
         return await self.yango_request(ORDER_UPDATE_ENDPOINT, asdict(data))
 
-
-    async def get_order_detail(self, order_id: str):
+    async def get_order_detail(self, order_id: str) -> YangoOrderDetails:
         data = {'order_id': order_id}
-        return await self.yango_request(ORDER_DETAIL_ENDPOINT, data)
+        response = await self.yango_request(ORDER_DETAIL_ENDPOINT, data)
 
+        return from_dict(YangoOrderDetails, {'order_id': order_id, **response})
 
-    async def get_orders_state(self, order_ids: list[str]):
+    async def get_orders_state(self, order_ids: list[str]) -> list[YangoOrderStateQuery]:
         data = {'orders': order_ids}
-        return await self.yango_request(ORDERS_STATE_ENDPOINT, data)
+        response = await self.yango_request(ORDERS_STATE_ENDPOINT, data)
+
+        return [from_dict(YangoOrderStateQuery, orders_state) for orders_state in response['query_results']]
 
     def process_order_event_data(self, event: dict[str, Any]) -> YangoStateChangeEventData | YangoNewOrderEventData | YangoReceiptIssuedEventData:
         if event['type'] == YangoOrderEventType.STATE_CHANGE:
@@ -103,23 +102,23 @@ class YangoClient(YangoPricesClient):
         return from_dict(YangoGetReceiptResponse, response, config=Config(cast=[Enum]))
 
 
-    async def upload_receipt(self, receipt_id: str, document: str):
+    async def upload_receipt(self, receipt_id: str, document: str) -> None:
         data = {
             'receipt_id': receipt_id,
             'document': document,
             'content_type': 'application/pdf'
         }
-        return await self.yango_request(RECEIPTS_UPLOAD_ENDPOINT, data)
+        await self.yango_request(RECEIPTS_UPLOAD_ENDPOINT, data)
 
 
-    async def set_order_state_in_wms(self, order_id: str, state: str):
+    async def set_order_state_in_wms(self, order_id: str, state: str) -> None:
         data = {'order_id': order_id, 'state': state}
-        return await self.yango_request(WMS_PICKING_SET_STATE_ENDPOINT, data)
+        await self.yango_request(WMS_PICKING_SET_STATE_ENDPOINT, data)
 
 
-    async def set_order_state_in_logistic(self, order_id: str, state: str):
+    async def set_order_state_in_logistic(self, order_id: str, state: str) -> Any:
         data = {'order_id': order_id, 'state': state}
-        return await self.yango_request(LOGISTIC_DELIVERY_SET_STATE_ENDPOINT, data)
+        await self.yango_request(LOGISTIC_DELIVERY_SET_STATE_ENDPOINT, data)
 
 
     def filter_extra_attributes(self, attribute_dict: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -176,24 +175,45 @@ class YangoClient(YangoPricesClient):
         return products
 
     async def create_products(self, products: list[YangoProductData]) -> None:
-        data = {
-            'products': [asdict(pd) for pd in products]
-        }
-        await self.yango_request(PRODUCT_CREATE_ENDPOINT, data)
+        created_product_count = 0
+        for products_slice in self.batch_items(products, PRODUCTS_BATCH_SIZE):
+            data = {
+                'products': [asdict(pd) for pd in products_slice]
+            }
+            await self.yango_request(PRODUCT_CREATE_ENDPOINT, data)
+
+            created_product_count += len(products_slice)
+            logger.info(f'Create {created_product_count}/{len(products)} products')
+
+        logger.info(f'{created_product_count} products are created')
 
     async def create_product_media(self, media: YangoProductMedia) -> None:
         request_data = asdict(media)
         await self.yango_multipart_request(PRODUCT_MEDIA_CREATE_ENDPOINT, data=request_data)
 
-    async def update_stocks(self, wms_store_id: str, stocks: list[YangoStockData]):
+    async def update_stocks(self, wms_store_id: str, stocks: list[YangoStockData]) -> None:
+        updated_stocks_count = 0
+        for stocks_slice in self.batch_items(stocks, STOCKS_BATCH_SIZE):
+            data: dict[str, Any] = {
+                'update_mode': YangoStockUpdateMode.MODIFY,
+                'store_id': wms_store_id,
+                'stocks': [asdict(stock) for stock in stocks_slice]
+            }
+            await self.yango_request(STOCK_UPDATE_ENDPOINT, data)
+
+            updated_stocks_count += len(stocks_slice)
+            logger.info(f'Update {updated_stocks_count}/{len(stocks)} stocks')
+
+        logger.info(f'{updated_stocks_count} stocks are updated')
+
+    async def initialize_stocks(self, wms_store_id: str, stocks: list[YangoStockData]) -> None:
         data: dict[str, Any] = {
-            'update_mode': YangoStockUpdateMode.MODIFY,
             'store_id': wms_store_id,
             'stocks': [asdict(stock) for stock in stocks]
         }
-        return await self.yango_request(STOCK_UPDATE_ENDPOINT, data)
+        await self.yango_request(STOCK_INITIALIZE_ENDPOINT, data)
 
-    async def get_stocks(self, cursor: str | None = None):
+    async def get_stocks(self, cursor: str | None = None) -> dict[str, Any]:
         data: dict[str, Any] = {}
 
         if cursor is not None:
@@ -201,23 +221,38 @@ class YangoClient(YangoPricesClient):
 
         return await self.yango_request(STOCK_GET_ENDPOINT, data)
 
-    async def get_product_vat(self, product_ids: list[str]):
+    async def get_product_vats(self, product_ids: list[str]) -> list[dict[str, Any]]:
         data = {
             'product_ids': product_ids
         }
-        return await self.yango_request(PRODUCT_VAT_GET_ENDPOINT, data)
+        response = await self.yango_request(PRODUCT_VAT_GET_ENDPOINT, data)
+        return response['results']
 
-    async def update_product_vat(self, product_vat_data: list[YangoProductVat]):
-        data = {
-            'products_vat': [asdict(vat) for vat in product_vat_data]
-        }
-        return await self.yango_request(PRODUCT_VAT_UPDATE_ENDPOINT, data)
+    async def update_product_vat(self, product_vats: list[YangoProductVat]) -> None:
+        updated_product_vat_count = 0
+        for product_vats_slice in self.batch_items(product_vats, VAT_BATCH_SIZE):
+            data = {
+                'products_vat': [asdict(vat) for vat in product_vats_slice]
+            }
+            await self.yango_request(PRODUCT_VAT_UPDATE_ENDPOINT, data)
 
-    async def create_product_vat(self, product_vat_data: list[YangoProductVat]):
-        data = {
-            'products_vat': [asdict(vat) for vat in product_vat_data]
-        }
-        return await self.yango_request(PRODUCT_VAT_CREATE_ENDPOINT, data)
+            updated_product_vat_count += len(product_vats_slice)
+            logger.info(f'Update {updated_product_vat_count}/{len(product_vats)} product VATs')
+
+        logger.info(f'{updated_product_vat_count} product VATs are updated')
+
+    async def create_product_vat(self, product_vats: list[YangoProductVat]) -> None:
+        created_product_vat_count = 0
+        for product_vats_slice in self.batch_items(product_vats, VAT_BATCH_SIZE):
+            data = {
+                'products_vat': [asdict(vat) for vat in product_vats_slice]
+            }
+            await self.yango_request(PRODUCT_VAT_CREATE_ENDPOINT, data)
+
+            created_product_vat_count += len(product_vats_slice)
+            logger.info(f'Create {created_product_vat_count}/{len(product_vats)} product VATs')
+
+        logger.info(f'{created_product_vat_count} product VATs are created')
 
     async def get_stores(self) -> list[YangoStoreRecord]:
         response = await self.yango_request(STORES_GET_ENDPOINT, {})

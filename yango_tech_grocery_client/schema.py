@@ -152,11 +152,19 @@ class YangoOrderRecord:
     store_id: str | None = None
     use_external_logistics: bool | None = None
     delivery_properties: YangoDeliveryProperties | None = None
+    human_order_id: str | None = None
 
 
 @dataclass(kw_only=True)
 class YangoOrderDetails(YangoOrderRecord):
     create_time: str
+
+
+@dataclass(kw_only=True)
+class YangoOrderStateQuery(YangoOrderRecord):
+    order_id: str
+    query_result: str
+    state: YangoOrderState | None = None
 
 
 @dataclass(kw_only=True)
@@ -168,6 +176,7 @@ class YangoStateChangeEventData:
 @dataclass(kw_only=True)
 class YangoNewOrderEventData:
     type: Literal[YangoOrderEventType.NEW_ORDER]
+
 
 @dataclass(kw_only=True)
 class YangoReceiptIssuedEventData:
@@ -313,6 +322,9 @@ class YangoCustomAttributes:
     descriptionLoc: dict[str, str] | None = None
     nomenclatureType: YangoNomenclatureType | str | None = None
     typeAccounting: YangoTypeAccounting | str | None = None
+    trueMark: bool | None = None
+    mercury: bool | None = None
+    oblastHran: str | None = None
     extraAttributes: dict[str, Any] | None = None
 
 

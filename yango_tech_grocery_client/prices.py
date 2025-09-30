@@ -3,25 +3,26 @@ from dataclasses import asdict
 from dacite import from_dict
 import logging
 from .endpoints import (
-    DISCOUNTS_CREATE_ENDPOINT, PRICE_CREATE_ENDPOINT, PRICE_GET_ENDPOINT,
-    PRICE_LIST_CREATE_ENDPOINT, PRICE_SET_ENDPOINT, PRICE_UPDATE_ENDPOINT,
-    STORE_PRICE_LIST_LINK_CREATE_ENDPOINT, STORE_PRICE_LIST_LINK_GET_ENDPOINT,
+    DISCOUNTS_CREATE_ENDPOINT, PRICE_GET_ENDPOINT, PRICE_SET_ENDPOINT,
+    PRICE_LIST_CREATE_ENDPOINT, STORE_PRICE_LIST_LINK_CREATE_ENDPOINT, STORE_PRICE_LIST_LINK_GET_ENDPOINT,
     PRICE_LIST_UPDATES_ENDPOINT, PRICE_LIST_GET_ENDPOINT
 )
-from .constants import DEFAULT_REQUEST_LIMIT, DISCOUNTS_BATCH_SIZE, SERVICE_NAME
+from .constants import DEFAULT_REQUEST_LIMIT, DISCOUNTS_BATCH_SIZE, PRICES_BATCH_SIZE, SERVICE_NAME
 from .schema import (
-    YangoPriceListData, YangoPriceListUpdateData, YangoPriceData, YangoStorePriceLinkData,
-    YangoDiscountRecord
+    YangoPriceListData, YangoPriceListUpdateData, YangoPriceData, YangoStorePriceLinkData, YangoDiscountRecord
 )
 from .base_client import BaseYangoClient
 
+
 logger = logging.getLogger(SERVICE_NAME)
+
 
 def get_price_request_data(price_record: YangoPriceData) -> dict[str, Any]:
     return {
         'price': str(price_record.price), 'pricelist_id': price_record.price_list_id,
         'product_id': price_record.product_id, 'price_per_quantity': price_record.price_per_quantity
     }
+
 
 class YangoPricesClient(BaseYangoClient):
     """
@@ -36,13 +37,27 @@ class YangoPricesClient(BaseYangoClient):
         }
         await self.yango_request(PRICE_LIST_CREATE_ENDPOINT, data)
 
-
-    async def get_price_lists(self, price_list_ids: list[str]):
+    async def get_price_lists(self, price_list_ids: list[str]) -> list[dict[str, Any]]:
         data = {
             'pricelist_ids': price_list_ids
         }
         result = await self.yango_request(PRICE_LIST_GET_ENDPOINT, data)
         return result['results']
+
+    async def sync_price_lists(self, price_list_ids: set[str]) -> None:
+        logger.info(f'{len(price_list_ids)} price lists found')
+
+        existing_price_lists = await self.get_price_lists(list(price_list_ids))
+        logger.info(f'{len(existing_price_lists)} price lists already exist in WMS')
+
+        lists_to_create = [
+            YangoPriceListUpdateData(pl['pricelist_id'], pl['pricelist_id'])
+            for pl in existing_price_lists if pl['get_result'] == 'pricelist_not_found'
+        ]
+        logger.info(f'{len(lists_to_create)} price lists need to be created')
+
+        if len(lists_to_create) > 0:
+            await self.create_price_lists(lists_to_create)
 
     async def get_price_list_updates(self, cursor: str | None = None) -> AsyncGenerator[YangoPriceListData, None]:
         logger.info('Loading existing products from WMS')
@@ -74,7 +89,6 @@ class YangoPricesClient(BaseYangoClient):
         result = await self.yango_request(STORE_PRICE_LIST_LINK_GET_ENDPOINT, data)
         return result['results']
 
-
     async def create_store_price_list_links(self, links: list[YangoStorePriceLinkData]) -> None:
         link_data: list[dict[str, Any]] = []
         for link in links:
@@ -84,6 +98,22 @@ class YangoPricesClient(BaseYangoClient):
         data = {'links': link_data}
         await self.yango_request(STORE_PRICE_LIST_LINK_CREATE_ENDPOINT, data)
 
+    async def sync_price_list_links(self, wms_store_id_to_price_list_id: dict[str, str]) -> None:
+        wms_store_ids = set(wms_store_id_to_price_list_id.keys())
+        existing_links = await self.get_store_price_list_links(list(wms_store_ids))
+        logger.info(f'{len(existing_links)} price lists links already exist in WMS')
+
+        wms_store_ids_to_create_links = [
+            link['store_id'] for link in existing_links if not link.get('store_pricelist_link_data')
+        ]
+        logger.info(f'{len(wms_store_ids_to_create_links)} price lists links need to be created')
+
+        for wms_store_id in wms_store_ids_to_create_links:
+            price_list_id = wms_store_id_to_price_list_id[wms_store_id]
+
+            await self.create_store_price_list_links([
+                YangoStorePriceLinkData(wms_store_id, price_list_id=price_list_id)
+            ])
 
     async def get_prices(self, price_list_ids: list[str]) -> dict[str, list[YangoPriceData]]:
         data = {
@@ -105,16 +135,18 @@ class YangoPricesClient(BaseYangoClient):
             result[list_id] = prices
         return result
 
+    async def set_prices(self, prices: list[YangoPriceData]) -> None:
+        set_price_count = 0
+        for prices_slice in self.batch_items(prices, PRICES_BATCH_SIZE):
+            data = {
+                'prices': [get_price_request_data(price) for price in prices_slice]
+            }
+            await self.yango_request(PRICE_SET_ENDPOINT, data)
 
-    async def update_prices(self, prices: list[YangoPriceData]):
-        prices_data = [get_price_request_data(price) for price in prices]
-        data = {'prices': prices_data}
-        return await self.yango_request(PRICE_UPDATE_ENDPOINT, data)
+            set_price_count += len(prices_slice)
+            logger.info(f'Set {set_price_count}/{len(prices)} prices')
 
-    async def set_prices(self, prices: list[YangoPriceData]):
-        prices_data = [get_price_request_data(price) for price in prices]
-        data = {'prices': prices_data}
-        return await self.yango_request(PRICE_SET_ENDPOINT, data)
+        logger.info(f'{set_price_count} prices are set')
 
     async def get_prices_dict(self, price_list_ids: list[str]) -> dict[str, dict[str, YangoPriceData]]:
         price_lists = await self.get_prices(price_list_ids)
@@ -126,25 +158,15 @@ class YangoPricesClient(BaseYangoClient):
             result[pricelist_id] = price_dict
         return result
 
-    async def create_prices(self, prices: list[YangoPriceData]):
-        prices_data = [get_price_request_data(price) for price in prices]
-        data = {'prices': prices_data}
-        return await self.yango_request(PRICE_CREATE_ENDPOINT, data)
+    async def create_discounts(self, discounts: list[YangoDiscountRecord]) -> None:
+        created_discount_count = 0
+        for discounts_slice in self.batch_items(discounts, DISCOUNTS_BATCH_SIZE):
+            data = {
+                'discounts': [asdict(d) for d in discounts_slice]
+            }
+            await self.yango_request(DISCOUNTS_CREATE_ENDPOINT, data)
 
-    async def create_discounts(self, discounts: list[YangoDiscountRecord]):
-        if not discounts:
-            logger.info('No discounts for creating')
-            return
+            created_discount_count += len(discounts_slice)
+            logger.info(f'Create {created_discount_count}/{len(discounts)} discounts')
 
-        slice_start = 0
-
-        while slice_start < len(discounts):
-            discounts_slice = discounts[slice_start:slice_start+DISCOUNTS_BATCH_SIZE]
-
-            data = {'discounts': [asdict(d) for d in discounts_slice]}
-            response = await self.yango_request(DISCOUNTS_CREATE_ENDPOINT, data)
-
-            logger.info(f'Create {len(discounts_slice)} discounts: {response}')
-
-            slice_start += DISCOUNTS_BATCH_SIZE
-
+        logger.info(f'{created_discount_count} discounts are created')

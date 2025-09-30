@@ -6,16 +6,13 @@ class YangoException(Exception):
 
 
 class YangoRequestError(YangoException):
-    def __init__(self, message: str, url: str, status: int) -> None:
+    def __init__(
+        self, message: str, url: str, status: int, response_text: str, payload: dict[Any, Any] | None = None
+    ) -> None:
         self.message = message
+        self.response_text = response_text
         self.status = status
         self.url = url
+        self.payload = payload if payload is not None else {}
 
         super().__init__(message)
-
-
-class YangoBadRequest(YangoRequestError):
-    def __init__(self, message: str, url: str, status: int, payload: dict[Any, Any]) -> None:
-        self.payload = payload
-
-        super().__init__(message, url, status)

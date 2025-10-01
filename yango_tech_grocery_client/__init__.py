@@ -4,7 +4,7 @@ Yango Tech Grocery API Client
 A Python client library for interacting with the Yango Tech Grocery API.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __author__ = "Yango Tech"
 __email__ = "tech@yango.com"
 

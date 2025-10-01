@@ -116,7 +116,7 @@ class YangoClient(YangoPricesClient):
         await self.yango_request(WMS_PICKING_SET_STATE_ENDPOINT, data)
 
 
-    async def set_order_state_in_logistic(self, order_id: str, state: str) -> Any:
+    async def set_order_state_in_logistic(self, order_id: str, state: str) -> None:
         data = {'order_id': order_id, 'state': state}
         await self.yango_request(LOGISTIC_DELIVERY_SET_STATE_ENDPOINT, data)
 

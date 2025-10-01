@@ -7,6 +7,7 @@ from yarl import URL
 from .constants import DEFAULT_BATCH_SIZE
 from .utils import YangoErrorHandler, retry_request
 from .exceptions import YangoRequestError
+from .rate_limiter import yango_rate_limiter
 
 
 T = TypeVar('T')
@@ -20,13 +21,15 @@ class BaseYangoClient:
         auth_token: str,
         error_handler: YangoErrorHandler | None = None,
         proxy: str | URL | None = None,
-        ssl: bool | None = None
+        ssl: bool | None = None,
+        should_use_rate_limiter: bool = False
     ):
         self.auth_token = auth_token
         self.domain = domain
         self.error_handler = error_handler
         self.proxy = proxy
         self.ssl = ssl if ssl is not None else not bool(proxy)
+        self.should_use_rate_limiter = should_use_rate_limiter
 
     async def process_yango_response(self, resp: aiohttp.ClientResponse, payload: dict[Any, Any] | None = None) -> Any:
         trace_id = resp.headers.get('x-yatraceid')
@@ -49,6 +52,9 @@ class BaseYangoClient:
 
     @retry_request
     async def yango_request(self, endpoint: str, data: dict[str, Any]) -> Any:
+        if self.should_use_rate_limiter:
+            await yango_rate_limiter.acquire(endpoint, auth_token=self.auth_token)
+
         headers = {
             'Authorization': f'Bearer {self.auth_token}',
             'Content-Type': 'application/json'
@@ -60,6 +66,9 @@ class BaseYangoClient:
 
     @retry_request
     async def yango_multipart_request(self, endpoint: str, data: dict[str, Any]) -> Any:
+        if self.should_use_rate_limiter:
+            await yango_rate_limiter.acquire(endpoint, auth_token=self.auth_token)
+
         headers = {'Authorization': f'Bearer {self.auth_token}'}
         url = self.domain + endpoint
         form_data = aiohttp.FormData()

@@ -26,7 +26,6 @@ def retry_request(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
                     await asyncio.sleep(RETRY_DELAY)
                     continue
 
-                logger.error(e.message)
                 raise e
 
     return wrapper

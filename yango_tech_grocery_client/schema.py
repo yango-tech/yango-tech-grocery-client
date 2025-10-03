@@ -1,8 +1,7 @@
+import io
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal
-import io
-
 
 """
 The class was added for clarity. Do not use it in other schemas.
@@ -85,7 +84,7 @@ class YangoStockUpdateMode(str, Enum):
     MODIFY = 'modify'
 
 
-AttributeTranslations = dict[str, str] # {lang_code: name}
+AttributeTranslations = dict[str, str]  # {lang_code: name}
 
 
 @dataclass
@@ -190,10 +189,12 @@ class YangoOrderEvent:
     order_id: str
     occurred: str
 
+
 @dataclass(kw_only=True)
 class YangoOrderEventQueryResponse:
     cursor: str
     orders_events: list[YangoOrderEvent]
+
 
 @dataclass(kw_only=True)
 class YangoReceiptOrder:
@@ -238,7 +239,7 @@ class YangoReceiptProductItem:
 
 
 @dataclass(kw_only=True)
-class YangoReceiptNotProductItem: # delivery, tips or service fee
+class YangoReceiptNotProductItem:  # delivery, tips or service fee
     item_type: str
     title: AttributeTranslations | None = None
     payments: list[YangoReceiptItemPayment]
@@ -261,7 +262,7 @@ class YangoReceiptClient:
 
 @dataclass(kw_only=True)
 class YangoPaymentMethod:
-    payment_type: str # cash, online, apple_pay, etc
+    payment_type: str  # cash, online, apple_pay, etc
 
 
 class YangoReceiptType(str, Enum):
@@ -316,7 +317,7 @@ class YangoCustomAttributes:
     longName: dict[str, str]
     shortNameLoc: dict[str, str]
     markCount: float
-    markCountUnitList: str # YangoMarkCountUnitList
+    markCountUnitList: str  # YangoMarkCountUnitList
     barcode: list[str] = field(default_factory=list[str])
     images: list[str] | None = None
     descriptionLoc: dict[str, str] | None = None
@@ -335,7 +336,6 @@ class YangoProductData:
     product_id: str
     status: YangoProductStatus | str
     is_meta: bool
-
 
 
 @dataclass

@@ -1,7 +1,6 @@
 import asyncio
 import time
 from collections import defaultdict, deque
-from typing import Dict, Tuple
 
 from .constants import MAX_RPS
 
@@ -22,7 +21,7 @@ class MethodRateLimiter:
         """
         self.max_rps = max_rps
         self.enabled = enabled
-        self.request_timestamps: Dict[Tuple[str, str], deque[float]] = defaultdict(deque)
+        self.request_timestamps: dict[tuple[str, str], deque[float]] = defaultdict(deque)
         self._lock = asyncio.Lock()
 
     async def acquire(self, endpoint: str, auth_token: str) -> None:
@@ -69,14 +68,14 @@ class MethodRateLimiter:
 
         return len(self.request_timestamps[key])
 
-    def get_difference_with_first_request(self, key: Tuple[str, str], timestamp: float) -> float:
+    def get_difference_with_first_request(self, key: tuple[str, str], timestamp: float) -> float:
         """
         Get a difference in seconds between the first timestamp and a timestamp passed in parameters
         for a specific auth_token and endpoint combination
         """
         return timestamp - self.request_timestamps[key][0]
 
-    def clean_up_old_timestamps(self, key: Tuple[str, str]) -> None:
+    def clean_up_old_timestamps(self, key: tuple[str, str]) -> None:
         """
         Clean up old timestamps older than 1 second
         """

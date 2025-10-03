@@ -1,20 +1,20 @@
+from collections.abc import Generator
+from enum import Enum
+from typing import Any, TypeVar
+
 import aiohttp
 from aiohttp import ClientSession
-from enum import Enum
-from typing import Any, Generator, TypeVar
 from yarl import URL
 
 from .constants import DEFAULT_BATCH_SIZE
-from .utils import YangoErrorHandler, retry_request
 from .exceptions import YangoRequestError
 from .rate_limiter import yango_rate_limiter
-
+from .utils import YangoErrorHandler, retry_request
 
 T = TypeVar('T')
 
 
 class BaseYangoClient:
-
     def __init__(
         self,
         domain: str,
@@ -22,7 +22,7 @@ class BaseYangoClient:
         error_handler: YangoErrorHandler | None = None,
         proxy: str | URL | None = None,
         ssl: bool | None = None,
-        should_use_rate_limiter: bool = False
+        should_use_rate_limiter: bool = False,
     ):
         self.auth_token = auth_token
         self.domain = domain
@@ -42,7 +42,10 @@ class BaseYangoClient:
         url = str(resp.url)
         response_text = await resp.text()
 
-        message = f'Status {status} from Yango on {url}. Trace ID {trace_id}. Request ID {request_id}. Response {response_text}'
+        message = (
+            f'Status {status} from Yango on {url}. Trace ID {trace_id}.'
+            f'Request ID {request_id}. Response {response_text}'
+        )
         if self.error_handler is not None:
             await self.error_handler.process_yango_error(
                 url, status, trace_id, request_id, response_text, payload=payload
@@ -55,10 +58,7 @@ class BaseYangoClient:
         if self.should_use_rate_limiter:
             await yango_rate_limiter.acquire(endpoint, auth_token=self.auth_token)
 
-        headers = {
-            'Authorization': f'Bearer {self.auth_token}',
-            'Content-Type': 'application/json'
-        }
+        headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
         url = self.domain + endpoint
         async with ClientSession() as session:
             async with session.post(url=url, json=data, headers=headers, proxy=self.proxy, ssl=self.ssl) as resp:
@@ -86,4 +86,4 @@ class BaseYangoClient:
     @staticmethod
     def batch_items(items: list[T], batch_size: int = DEFAULT_BATCH_SIZE) -> Generator[list[T], None, None]:
         for i in range(0, len(items), batch_size):
-            yield items[i:i + batch_size]
+            yield items[i : i + batch_size]

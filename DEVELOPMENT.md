@@ -50,9 +50,8 @@ This document contains instructions for developers who want to contribute to or 
 
 3. **Lint and Format code:**
    ```bash
-   poetry run black .
-   poetry run isort .
-   poetry run flake8
+   poetry run ruff format
+   poetry run ruff check --fix
    ```
 
 ## Version Management

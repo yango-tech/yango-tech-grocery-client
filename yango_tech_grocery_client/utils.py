@@ -1,15 +1,17 @@
-from typing import Any, Awaitable, Callable, TypeVar, ParamSpec
-from functools import wraps
-from .exceptions import YangoRequestError
-from .constants import ERROR_STATUSES_FOR_RETRY, MAX_RETRIES, SERVICE_NAME, RETRY_DELAY
-import logging
 import asyncio
+import logging
+from collections.abc import Awaitable, Callable
+from functools import wraps
+from typing import Any, ParamSpec, TypeVar
 
+from .constants import ERROR_STATUSES_FOR_RETRY, MAX_RETRIES, RETRY_DELAY, SERVICE_NAME
+from .exceptions import YangoRequestError
 
 P = ParamSpec('P')
 R = TypeVar('R')
 
 logger = logging.getLogger(SERVICE_NAME)
+
 
 def retry_request(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
     @wraps(func)
@@ -34,12 +36,15 @@ def retry_request(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
 class YangoErrorHandler:
     async def process_yango_error(
         self,
-        url: str, status: int,
-        trace_id: str | None, request_id: str | None,
-        response_text: str | None, payload: dict[Any, Any] | None = None
+        url: str,
+        status: int,
+        trace_id: str | None,
+        request_id: str | None,
+        response_text: str | None,
+        payload: dict[Any, Any] | None = None,
     ) -> None:
         """
-            Inherit this class and implement your own error handler
-            This is useful for logging all integration errors separately from other errors
+        Inherit this class and implement your own error handler
+        This is useful for logging all integration errors separately from other errors
         """
         raise NotImplementedError('YangoErrorHandler is not implemented')

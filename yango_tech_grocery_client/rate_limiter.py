@@ -11,16 +11,14 @@ class MethodRateLimiter:
     Each (auth_token, endpoint) pair has its own rate limit counter using a sliding window approach
     """
 
-    def __init__(self, max_rps: int = 5, enabled: bool = True):
+    def __init__(self, max_rps: int = 5):
         """
         Initialize the rate limiter
 
         Args:
             max_rps: Maximum requests per second per auth_token-endpoint combination
-            enabled: Whether rate limiting is enabled
         """
         self.max_rps = max_rps
-        self.enabled = enabled
         self.request_timestamps: dict[tuple[str, str], deque[float]] = defaultdict(deque)
         self._lock = asyncio.Lock()
 
@@ -35,8 +33,6 @@ class MethodRateLimiter:
             endpoint: The endpoint URL being requested
             auth_token: The authentication auth_token being used
         """
-        if not self.enabled:
-            return
 
         async with self._lock:
             key = (auth_token, endpoint)

@@ -152,22 +152,6 @@ class TestRateLimiter(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(elapsed, 0.9, 'Expected to wait at least 0.9 seconds for concurrent access')
         self.assertLessEqual(elapsed, 1.1, 'Expected to wait at most 1.1 seconds for concurrent access')
 
-    async def test_rate_limiter_disabled(self) -> None:
-        """Test that rate limiter does nothing when disabled"""
-        max_rps = 1
-        limiter = MethodRateLimiter(max_rps, enabled=False)
-        endpoint = '/test/endpoint'
-        token = 'test_token'
-
-        # Make max_rps + 9 requests - should all pass immediately since rate limiting is disabled
-        start_time = time.time()
-        for _ in range(max_rps + 9):
-            await limiter.acquire(endpoint, token)
-
-        elapsed = time.time() - start_time
-        # Should be almost immediate (less than 0.1 seconds)
-        self.assertLess(elapsed, 0.1, 'Expected immediate execution when disabled')
-
     async def test_rate_limiter_precise_waiting(self) -> None:
         """Test that rate limiter waits precisely based on request timing"""
         max_rps = 2

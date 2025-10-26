@@ -36,3 +36,8 @@ STOCK_INITIALIZE_ENDPOINT = '/b2b/v1/stocks/initialize'
 STOCK_GET_ENDPOINT = '/b2b/v1/stocks/query'
 
 STORES_GET_ENDPOINT = '/b2b/v1/stores/get'
+
+THIRD_PARTY_LOGISTICS_DELIVERIES_EVENTS_QUERY_ENDPOINT = '/b2b/v1/3pl/deliveries/events/query'
+THIRD_PARTY_LOGISTICS_DELIVERY_STATUS_UPDATE_ENDPOINT = '/b2b/v1/3pl/deliveries/status/update'
+THIRD_PARTY_LOGISTICS_DELIVERY_COURIER_INFO_UPDATE_ENDPOINT = '/b2b/v1/3pl/deliveries/courier/info/update'
+THIRD_PARTY_LOGISTICS_DELIVERY_COURIER_POSITION_UPDATE_ENDPOINT = '/b2b/v1/3pl/deliveries/courier/position/update'

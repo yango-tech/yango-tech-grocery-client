@@ -10,8 +10,9 @@ __email__ = 'tech@yango.com'
 
 from .base_client import BaseYangoClient
 from .client import YangoClient
+from .client_prices import YangoPricesClient
+from .client_third_party_logistics import YangoThirdPartyLogisticsClient
 from .exceptions import YangoException, YangoRequestError
-from .prices import YangoPricesClient
 
 # Import main schema classes for convenience
 from .schema import (
@@ -39,6 +40,7 @@ __all__ = [
     'YangoClient',
     'BaseYangoClient',
     'YangoPricesClient',
+    'YangoThirdPartyLogisticsClient',
     # Exceptions
     'YangoException',
     'YangoRequestError',

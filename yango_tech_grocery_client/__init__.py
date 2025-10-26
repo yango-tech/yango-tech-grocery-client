@@ -33,6 +33,7 @@ from .schema import (
     YangoStockData,
     YangoStockUpdateMode,
     YangoStoreRecord,
+    YangoThirdPartyLogisticsDeliveryType,
 )
 
 __all__ = [
@@ -62,4 +63,5 @@ __all__ = [
     'YangoProductVat',
     'YangoGetReceiptResponse',
     'YangoOrderEventQueryResponse',
+    'YangoThirdPartyLogisticsDeliveryType',
 ]

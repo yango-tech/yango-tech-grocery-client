@@ -6,9 +6,13 @@ Command-line interface for Yango Grocery Client.
 import argparse
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 
 from .client import YangoClient
 from .constants import DEFAULT_DOMAIN
+
+if TYPE_CHECKING:
+    from .schema import YangoThirdPartyLogisticsDeliveryType
 
 
 async def get_stores(domain: str, auth_token: str) -> None:
@@ -56,6 +60,32 @@ async def get_order_detail(domain: str, auth_token: str, order_id: str) -> None:
         sys.exit(1)
 
 
+async def get_3pl_events(domain: str, auth_token: str, cursor: str | None = None, limit: int | None = None) -> None:
+    """Get and display 3PL delivery events summary."""
+    client = YangoClient(domain=domain, auth_token=auth_token)
+    try:
+        events_response = await client.get_deliveries_events(cursor=cursor, limit=limit)
+
+        event_counts: dict[YangoThirdPartyLogisticsDeliveryType, int] = {}
+        for event in events_response.events:
+            event_type = event.data.type
+            event_counts[event_type] = event_counts.get(event_type, 0) + 1
+
+        print(f'Found {len(events_response.events)} 3PL delivery events:')
+        print(f'Cursor: {events_response.cursor}')
+        print()
+
+        if event_counts:
+            print('Event types summary:')
+            for event_type, count in sorted(event_counts.items()):
+                print(f'  {event_type}: {count}')
+        else:
+            print('No events found.')
+    except Exception as e:
+        print(f'Error getting 3PL events: {e}', file=sys.stderr)
+        sys.exit(1)
+
+
 def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -66,6 +96,8 @@ Examples:
   %(prog)s stores --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN
   %(prog)s products --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN
   %(prog)s order --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --order-id ORDER_123
+  %(prog)s 3pl-events --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN
+  %(prog)s 3pl-events --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --limit 10 --cursor CURSOR_VALUE
         """,
     )
 
@@ -85,6 +117,11 @@ Examples:
     order_parser = subparsers.add_parser('order', help='Get order details')
     order_parser.add_argument('--order-id', required=True, help='Order ID to retrieve')
 
+    # 3PL Events command
+    events_parser = subparsers.add_parser('3pl-events', help='Get 3PL delivery events')
+    events_parser.add_argument('--cursor', help='Cursor for pagination')
+    events_parser.add_argument('--limit', type=int, help='Limit number of events to retrieve')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -98,6 +135,8 @@ Examples:
         asyncio.run(get_products(args.domain, args.token, not args.all))
     elif args.command == 'order':
         asyncio.run(get_order_detail(args.domain, args.token, args.order_id))
+    elif args.command == '3pl-events':
+        asyncio.run(get_3pl_events(args.domain, args.token, args.cursor, args.limit))
 
 
 if __name__ == '__main__':

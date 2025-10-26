@@ -225,7 +225,6 @@ class YangoReceiptPaymentAmount:
 @dataclass(kw_only=True)
 class YangoReceiptItemPayment:
     quantity: str
-    discount: str
     discount_amount: str = '0'
     payment_amounts: list[YangoReceiptPaymentAmount]
     barcode: str | None = None

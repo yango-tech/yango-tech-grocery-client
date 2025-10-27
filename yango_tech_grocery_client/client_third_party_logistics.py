@@ -37,7 +37,7 @@ class YangoThirdPartyLogisticsClient(BaseYangoClient):
         return from_dict(YangoThirdPartyLogisticsDeliveryEvents, response)
 
     async def update_delivery_status(self, delivery_id: int, status: YangoThirdPartyLogisticsDeliveryStatus) -> None:
-        data = {'delivery_id': delivery_id, 'status': asdict(status)}
+        data = {'delivery_id': delivery_id, 'status': status}
         await self.yango_request(THIRD_PARTY_LOGISTICS_DELIVERY_STATUS_UPDATE_ENDPOINT, data)
 
     async def update_delivery_courier_info(

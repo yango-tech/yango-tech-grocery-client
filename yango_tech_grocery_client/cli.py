@@ -86,6 +86,26 @@ async def get_3pl_events(domain: str, auth_token: str, cursor: str | None = None
         sys.exit(1)
 
 
+async def update_delivery_status(domain: str, auth_token: str, delivery_id: int, status: str) -> None:
+    """Update delivery status."""
+    from .schema import YangoThirdPartyLogisticsDeliveryStatus
+
+    client = YangoClient(domain=domain, auth_token=auth_token)
+    try:
+        delivery_status = YangoThirdPartyLogisticsDeliveryStatus(status)
+        await client.update_delivery_status(delivery_id, delivery_status)
+        print(f'Successfully updated delivery {delivery_id} status to {status}')
+    except ValueError:
+        print(
+            f'Invalid status "{status}". Valid statuses: {[s.value for s in YangoThirdPartyLogisticsDeliveryStatus]}',
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    except Exception as e:
+        print(f'Error updating delivery status: {e}', file=sys.stderr)
+        sys.exit(1)
+
+
 def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -98,6 +118,7 @@ Examples:
   %(prog)s order --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --order-id ORDER_123
   %(prog)s 3pl-events --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN
   %(prog)s 3pl-events --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --limit 10 --cursor CURSOR_VALUE
+  %(prog)s 3pl-update-delivery-status --domain {DEFAULT_DOMAIN} --token YOUR_TOKEN --delivery-id 123 --status matched
         """,
     )
 
@@ -117,10 +138,15 @@ Examples:
     order_parser = subparsers.add_parser('order', help='Get order details')
     order_parser.add_argument('--order-id', required=True, help='Order ID to retrieve')
 
-    # 3PL Events command
+    # 3PL - Events command
     events_parser = subparsers.add_parser('3pl-events', help='Get 3PL delivery events')
     events_parser.add_argument('--cursor', help='Cursor for pagination')
     events_parser.add_argument('--limit', type=int, help='Limit number of events to retrieve')
+
+    # 3PL - Update delivery status command
+    status_parser = subparsers.add_parser('3pl-update-delivery-status', help='Update delivery status')
+    status_parser.add_argument('--delivery-id', type=int, required=True, help='Delivery ID to update')
+    status_parser.add_argument('--status', required=True, help='New delivery status')
 
     args = parser.parse_args()
 
@@ -137,6 +163,8 @@ Examples:
         asyncio.run(get_order_detail(args.domain, args.token, args.order_id))
     elif args.command == '3pl-events':
         asyncio.run(get_3pl_events(args.domain, args.token, args.cursor, args.limit))
+    elif args.command == '3pl-update-delivery-status':
+        asyncio.run(update_delivery_status(args.domain, args.token, args.delivery_id, args.status))
 
 
 if __name__ == '__main__':

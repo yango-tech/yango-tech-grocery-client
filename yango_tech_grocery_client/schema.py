@@ -415,13 +415,13 @@ class YangoThirdPartyLogisticsDeliveryLocation:
 
 
 class YangoThirdPartyLogisticsDeliveryType(str, Enum):
-    CREATED = 'created'
-    CANCELED = 'canceled'
+    CREATE = 'create'
+    CANCEL = 'cancel'
 
 
 @dataclass(kw_only=True)
 class YangoThirdPartyLogisticsDeliveryCreated:
-    type: Literal[YangoThirdPartyLogisticsDeliveryType.CREATED]
+    type: Literal[YangoThirdPartyLogisticsDeliveryType.CREATE]
     client_phone: str
     currency: str
     destination: YangoThirdPartyLogisticsDeliveryLocation
@@ -440,7 +440,7 @@ class YangoThirdPartyLogisticsDeliveryCreated:
 
 @dataclass(kw_only=True)
 class YangoThirdPartyLogisticsDeliveryCancelled:
-    type: Literal[YangoThirdPartyLogisticsDeliveryType.CANCELED]
+    type: Literal[YangoThirdPartyLogisticsDeliveryType.CANCEL]
     reason: str | None = None
 
 

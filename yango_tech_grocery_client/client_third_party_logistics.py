@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 
 from dacite import from_dict
 
@@ -36,17 +37,17 @@ class YangoThirdPartyLogisticsClient(BaseYangoClient):
         return from_dict(YangoThirdPartyLogisticsDeliveryEvents, response)
 
     async def update_delivery_status(self, delivery_id: int, status: YangoThirdPartyLogisticsDeliveryStatus) -> None:
-        data = {'delivery_id': delivery_id, 'status': status}
+        data = {'delivery_id': delivery_id, 'status': asdict(status)}
         await self.yango_request(THIRD_PARTY_LOGISTICS_DELIVERY_STATUS_UPDATE_ENDPOINT, data)
 
     async def update_delivery_courier_info(
         self, delivery_id: int, courier_info: YangoThirdPartyLogisticsDeliveryCourierInfo
     ) -> None:
-        data = {'delivery_id': delivery_id, 'courier': courier_info}
+        data = {'delivery_id': delivery_id, 'courier': asdict(courier_info)}
         await self.yango_request(THIRD_PARTY_LOGISTICS_DELIVERY_COURIER_INFO_UPDATE_ENDPOINT, data)
 
     async def update_delivery_courier_position(
         self, delivery_id: int, courier_position: YangoThirdPartyLogisticsDeliveryCourierPosition
     ) -> None:
-        data = {'delivery_id': delivery_id, 'courier_position': courier_position}
+        data = {'delivery_id': delivery_id, 'courier_position': asdict(courier_position)}
         await self.yango_request(THIRD_PARTY_LOGISTICS_DELIVERY_COURIER_POSITION_UPDATE_ENDPOINT, data)

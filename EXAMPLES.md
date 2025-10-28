@@ -8,7 +8,7 @@ This file contains comprehensive examples for using the Yango Tech Grocery API C
 
 ```python
 import asyncio
-from yango_grocery_client import YangoClient
+from yango_tech_grocery_client import YangoClient
 
 async def main():
     # Initialize the client
@@ -32,7 +32,7 @@ asyncio.run(main())
 #### Create an Order
 
 ```python
-from yango_grocery_client import YangoClient, YangoOrderRecord, YangoShoppingCartItem
+from yango_tech_grocery_client import YangoClient, YangoOrderRecord, YangoShoppingCartItem
 
 async def create_order_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
@@ -127,7 +127,7 @@ async def get_products_example():
 #### Create Products
 
 ```python
-from yango_grocery_client import YangoProductData, YangoCustomAttributes
+from yango_tech_grocery_client import YangoProductData, YangoCustomAttributes
 
 async def create_products_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
@@ -169,7 +169,7 @@ async def get_product_updates_example():
 #### Create Price Lists
 
 ```python
-from yango_grocery_client import YangoPriceListUpdateData
+from yango_tech_grocery_client import YangoPriceListUpdateData
 
 async def create_price_lists_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
@@ -205,7 +205,7 @@ async def get_prices_example():
 #### Update Stocks
 
 ```python
-from yango_grocery_client import YangoStockData, YangoStockUpdateMode
+from yango_tech_grocery_client import YangoStockData, YangoStockUpdateMode
 
 async def update_stocks_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")
@@ -303,7 +303,7 @@ async def get_order_events_example():
 ### Error Handling
 
 ```python
-from yango_grocery_client import YangoRequestError
+from yango_tech_grocery_client import YangoRequestError
 
 async def error_handling_example():
     client = YangoClient(domain="https://api.retailtech.yango.com", auth_token="your_token")

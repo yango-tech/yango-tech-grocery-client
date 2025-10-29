@@ -16,6 +16,7 @@ PRODUCTS_REQUEST_LIMIT = 300
 
 
 REAL_MONEY_PAYMENT_METHODS = ('cash', 'online', 'card', 'apple_pay')
+LOYALTY_PAYMENT_METHODS = ('loyalty',)
 
 
 DEFAULT_DOMAIN = 'https://api.retailtech.yango.com'

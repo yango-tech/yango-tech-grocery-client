@@ -12,6 +12,7 @@ from .base_client import BaseYangoClient
 from .client import YangoClient
 from .client_prices import YangoPricesClient
 from .client_third_party_logistics import YangoThirdPartyLogisticsClient
+from .constants import LOYALTY_PAYMENT_METHODS, REAL_MONEY_PAYMENT_METHODS
 from .exceptions import YangoException, YangoRequestError
 
 # Import main schema classes for convenience
@@ -84,6 +85,9 @@ __all__ = [
     'BaseYangoClient',
     'YangoPricesClient',
     'YangoThirdPartyLogisticsClient',
+    # Constants
+    'LOYALTY_PAYMENT_METHODS',
+    'REAL_MONEY_PAYMENT_METHODS',
     # Exceptions
     'YangoException',
     'YangoRequestError',

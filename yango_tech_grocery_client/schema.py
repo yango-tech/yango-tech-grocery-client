@@ -30,6 +30,7 @@ class YangoOrderState(str, Enum):
     DELIVERING = 'delivering'
     CLOSED = 'closed'
     PENDING_CANCEL = 'pending_cancel'
+    COURIER_ASSIGNED = 'courier_assigned'
 
 
 class YangoOrderPickingState(str, Enum):
@@ -169,7 +170,7 @@ class YangoOrderStateQuery(YangoOrderRecord):
 @dataclass(kw_only=True)
 class YangoStateChangeEventData:
     type: Literal[YangoOrderEventType.STATE_CHANGE]
-    current_state: YangoOrderState
+    current_state: YangoOrderState | str
 
 
 @dataclass(kw_only=True)
@@ -224,7 +225,6 @@ class YangoReceiptPaymentAmount:
 @dataclass(kw_only=True)
 class YangoReceiptItemPayment:
     quantity: str
-    discount: str
     discount_amount: str = '0'
     payment_amounts: list[YangoReceiptPaymentAmount]
     barcode: str | None = None
@@ -295,7 +295,7 @@ class YangoPriceListUpdateData:
 
 @dataclass
 class YangoPriceListData(YangoPriceListUpdateData):
-    status: YangoPriceListStatus
+    status: YangoPriceListStatus | str
 
 
 @dataclass
@@ -348,8 +348,8 @@ class YangoStockData:
 class YangoProductMedia:
     data: io.BytesIO
     product_id: str
-    media_type: YangoMediaType
-    position: YangoMediaPosition
+    media_type: YangoMediaType | str
+    position: YangoMediaPosition | str
 
 
 @dataclass
@@ -373,3 +373,125 @@ class YangoStoreRecord:
     location: Point
     address: str | None = None
     name: str | None = None
+
+
+@dataclass(kw_only=True)
+class YangoStoreLocation:
+    position: Point
+    address: str | None = None
+
+
+### 3pl
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryItem:
+    price: str
+    product_id: str
+    title: str
+    depth: int | None = None
+    height: int | None = None
+    quantity: str | None = None
+    weight: int | None = None
+    width: int | None = None
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryLocation:
+    position: Point
+    building_name: str | None = None
+    city: str | None = None
+    comment: str | None = None
+    country: str | None = None
+    doorbell_name: str | None = None
+    doorcode: str | None = None
+    doorcode_extra: str | None = None
+    entrance: str | None = None
+    flat: str | None = None
+    floor: str | None = None
+    house: str | None = None
+    postal_code: str | None = None
+    street: str | None = None
+
+
+class YangoThirdPartyLogisticsDeliveryType(str, Enum):
+    CREATE = 'create'
+    CANCEL = 'cancel'
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryCreated:
+    type: Literal[YangoThirdPartyLogisticsDeliveryType.CREATE]
+    client_phone: str
+    currency: str
+    destination: YangoThirdPartyLogisticsDeliveryLocation
+    human_order_id: str
+    items: list[YangoThirdPartyLogisticsDeliveryItem]
+    order_id: str
+    origin: YangoStoreLocation
+    additional_phone_code: str | None = None
+    delivery_time: int | None = None
+    left_at_door: bool | None = None
+    meet_outside: bool | None = None
+    no_door_call: bool | None = None
+    store_id: str | None = None
+    total_price: str | None = None
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryCancelled:
+    type: Literal[YangoThirdPartyLogisticsDeliveryType.CANCEL]
+    reason: str | None = None
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryEvent:
+    data: YangoThirdPartyLogisticsDeliveryCreated | YangoThirdPartyLogisticsDeliveryCancelled
+    delivery_id: int
+    occurred: str
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryEvents:
+    events: list[YangoThirdPartyLogisticsDeliveryEvent]
+    cursor: str
+
+
+class YangoThirdPartyLogisticsDeliveryStatus(str, Enum):
+    SCHEDULED = 'scheduled'
+    MATCHING = 'matching'
+    OFFERED = 'offered'
+    MATCHED = 'matched'
+    DELIVERING = 'delivering'
+    DELIVERY_ARRIVED = 'delivery_arrived'
+    DELIVERED = 'delivered'
+    CANCELED = 'canceled'
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryCourierName:
+    first_name: str
+    patronymic: str | None = None
+    surname: str | None = None
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryCourierInfo:
+    id: str
+    name: YangoThirdPartyLogisticsDeliveryCourierName
+    phone: str
+    legal_entity: str | None = None
+    car_color: str | None = None
+    car_color_hex: str | None = None
+    car_model: str | None = None
+    car_number: str | None = None
+    phone_extension: str | None = None
+    transport_type: str | None = None
+
+
+@dataclass(kw_only=True)
+class YangoThirdPartyLogisticsDeliveryCourierPosition:
+    location: Point
+    timestamp: str
+    direction: float | None = None
+    speed: float | None = None

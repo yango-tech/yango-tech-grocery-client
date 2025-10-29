@@ -17,7 +17,7 @@ A Python client library for interacting with the Yango Tech Grocery API. This li
 ## Installation
 
 ```bash
-pip install yango-grocery-client
+pip install yango-tech-grocery-client
 ```
 
 ## Quick Start
@@ -26,7 +26,7 @@ pip install yango-grocery-client
 
 ```python
 import asyncio
-from yango_grocery_client import YangoClient
+from yango_tech_grocery_client import YangoClient
 
 async def main():
     # Initialize the client
@@ -34,7 +34,7 @@ async def main():
         domain="https://api.retailtech.yango.com",
         auth_token="your_auth_token_here"
     )
-    
+
     # Your API calls here
     stores = await client.get_stores()
     print(f"Found {len(stores)} stores")

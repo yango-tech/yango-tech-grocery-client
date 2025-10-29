@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "yango-tech-grocery-client"
-version = "1.0.0"
+version = "1.1.0"
 description = "A Python client library for interacting with the Yango Tech Grocery API"
 license = "MIT"
 readme = "README.md"
@@ -127,7 +127,7 @@ python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=yango_grocery_client",
+    "--cov=yango_tech_grocery_client",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",

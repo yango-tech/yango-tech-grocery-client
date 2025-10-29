@@ -6,6 +6,8 @@ from typing import Any
 
 from dacite import Config, from_dict
 
+from .client_prices import YangoPricesClient
+from .client_third_party_logistics import YangoThirdPartyLogisticsClient
 from .constants import PRODUCTS_BATCH_SIZE, PRODUCTS_REQUEST_LIMIT, SERVICE_NAME, STOCKS_BATCH_SIZE, VAT_BATCH_SIZE
 from .endpoints import (
     LOGISTIC_DELIVERY_SET_STATE_ENDPOINT,
@@ -29,7 +31,6 @@ from .endpoints import (
     STORES_GET_ENDPOINT,
     WMS_PICKING_SET_STATE_ENDPOINT,
 )
-from .prices import YangoPricesClient
 from .schema import (
     YangoCustomAttributes,
     YangoGetReceiptResponse,
@@ -55,7 +56,7 @@ from .schema import (
 logger = logging.getLogger(SERVICE_NAME)
 
 
-class YangoClient(YangoPricesClient):
+class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
     async def create_order(self, data: YangoOrderRecord) -> Any:
         return await self.yango_request(ORDER_CREATE_ENDPOINT, asdict(data))
 

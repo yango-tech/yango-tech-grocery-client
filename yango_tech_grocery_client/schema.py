@@ -282,6 +282,13 @@ class YangoReceiptRecord:
     client: YangoReceiptClient | None = None
 
 
+class YangoReceiptClientField(str, Enum):
+    FULL_NAME = 'full_name'
+    PHONE_NUMBER = 'phone_number'
+    EMAIL = 'email'
+    DELIVERY_ADDRESS = 'delivery_address'
+
+
 @dataclass(kw_only=True)
 class YangoGetReceiptResponse:
     receipts: list[YangoReceiptRecord]

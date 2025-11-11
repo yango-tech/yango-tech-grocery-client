@@ -46,6 +46,7 @@ from .schema import (
     YangoProductMedia,
     YangoProductStatus,
     YangoProductVat,
+    YangoReceiptClientField,
     YangoReceiptIssuedEventData,
     YangoStateChangeEventData,
     YangoStockData,
@@ -113,8 +114,28 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
             ],
         )
 
-    async def get_receipt(self, receipt_id: str) -> YangoGetReceiptResponse:
-        data = {'receipt_id': receipt_id}
+    async def get_receipt(
+        self,
+        *,
+        receipt_id: str | None = None,
+        order_id: str | None = None,
+        client_fields: list[YangoReceiptClientField] | None = None,
+    ) -> YangoGetReceiptResponse:
+        data = {}
+
+        if receipt_id and order_id:
+            # according to Yango API
+            raise Exception("Exactly one of the fields 'order_id', 'receipt_id' required")
+
+        if receipt_id:
+            data['receipt_id'] = receipt_id
+        elif order_id:
+            data['order_id'] = order_id
+        else:
+            raise Exception("One of the fields 'order_id' or 'receipt_id' is required")
+
+        if client_fields:
+            data['client_fields'] = client_fields
 
         response = await self.yango_request(RECEIPTS_GET_ENDPOINT, data)
 

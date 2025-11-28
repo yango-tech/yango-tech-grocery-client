@@ -84,6 +84,27 @@ class YangoStockUpdateMode(str, Enum):
     INIT = 'initialize'
     MODIFY = 'modify'
 
+class YangoStockShelfType(str, Enum):
+    INCOMING = 'incoming'
+    OUT = 'out'
+    TRASH = 'trash'
+    LOST = 'lost'
+    FOUND = 'found'
+    STORE = 'store'
+    MARKDOWN = 'markdown'
+    OFFICE = 'office'
+    PARCEL = 'parcel'
+    PARCEL_RETURNED = 'parcel_returned'
+    COLLECTION = 'collection'
+    CARGO = 'cargo'
+    REPACKING = 'repacking'
+    REVIEW = 'review'
+    KITCHEN_ON_DEMAND = 'kitchen_on_demand'
+    KITCHEN_COMPONENTS = 'kitchen_components'
+    KITCHEN_TRASH = 'kitchen_trash'
+    KITCHEN_LOST = 'kitchen_lost'
+    KITCHEN_FOUND = 'kitchen_found'
+
 
 AttributeTranslations = dict[str, str]  # {lang_code: name}
 
@@ -350,6 +371,11 @@ class YangoStockData:
     product_id: str
     quantity: int
 
+
+@dataclass
+class YangoStockDataWithStore(YangoStockData):
+    shelf_type: YangoStockShelfType
+    store_id: str
 
 @dataclass
 class YangoProductMedia:

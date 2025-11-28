@@ -84,6 +84,7 @@ class YangoStockUpdateMode(str, Enum):
     INIT = 'initialize'
     MODIFY = 'modify'
 
+
 class YangoStockShelfType(str, Enum):
     INCOMING = 'incoming'
     OUT = 'out'
@@ -376,6 +377,7 @@ class YangoStockData:
 class YangoStockDataWithStore(YangoStockData):
     shelf_type: YangoStockShelfType
     store_id: str
+
 
 @dataclass
 class YangoProductMedia:

@@ -375,7 +375,7 @@ class YangoStockData:
 
 @dataclass
 class YangoStockChangeData(YangoStockData):
-    shelf_type: YangoStockShelfType
+    shelf_type: YangoStockShelfType | str
     store_id: str
 
 

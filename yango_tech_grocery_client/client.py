@@ -57,7 +57,7 @@ from .schema import (
     YangoReceiptIssuedEventData,
     YangoStateChangeEventData,
     YangoStockData,
-    YangoStockDataWithStore,
+    YangoStockChangeData,
     YangoStockUpdateMode,
     YangoStoreRecord,
 )
@@ -257,7 +257,7 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
 
         return await self.yango_request(STOCK_GET_ENDPOINT, data)
 
-    async def get_stock_updates(self, cursor: str | None = None) -> AsyncGenerator[YangoStockDataWithStore, None]:
+    async def get_stock_updates(self, cursor: str | None = None) -> AsyncGenerator[YangoStockChangeData, None]:
         """
         Returns an async generator that yields stock updates from WMS, starting from the cursor.
         If you want full snapshot - use get_all_stocks.
@@ -272,15 +272,15 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
             total_stock_count += len(stocks)
             logger.info(f'Loaded {total_stock_count} stocks from WMS')
             for stock in stocks:
-                yield from_dict(YangoStockDataWithStore, stock, config=Config(cast=[Enum]))
+                yield from_dict(YangoStockChangeData, stock, config=Config(cast=[Enum]))
             if len(stocks) < STOCKS_REQUEST_LIMIT:
                 return
 
-    async def get_all_stocks(self) -> dict[str, dict[str, YangoStockDataWithStore]]:
+    async def get_all_stocks(self) -> dict[str, dict[str, YangoStockChangeData]]:
         """
         Returns all stocks from WMS as a nested dict: store_id -> product_id -> stock data.
         """
-        stocks: dict[str, dict[str, YangoStockDataWithStore]] = {}
+        stocks: dict[str, dict[str, YangoStockChangeData]] = {}
         async for stock in self.get_stock_updates():
             store_stocks = stocks.setdefault(stock.store_id, {})
             store_stocks[stock.product_id] = stock

@@ -4,7 +4,7 @@ Yango Tech Grocery API Client
 A Python client library for interacting with the Yango Tech Grocery API.
 """
 
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __author__ = 'Yango Tech'
 __email__ = 'tech@yango.com'
 
@@ -62,7 +62,7 @@ from .schema import (
     YangoShoppingCartItem,
     YangoStateChangeEventData,
     YangoStockData,
-    YangoStockDataWithStore,
+    YangoStockChangeData,
     YangoStockUpdateMode,
     YangoStoreLocation,
     YangoStorePriceLinkData,
@@ -139,7 +139,7 @@ __all__ = [
     'YangoShoppingCartItem',
     'YangoStateChangeEventData',
     'YangoStockData',
-    'YangoStockDataWithStore',
+    'YangoStockChangeData',
     'YangoStockUpdateMode',
     'YangoStoreLocation',
     'YangoStorePriceLinkData',

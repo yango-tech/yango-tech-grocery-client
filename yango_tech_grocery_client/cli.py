@@ -45,6 +45,30 @@ async def get_products(domain: str, auth_token: str, only_active: bool = True) -
         sys.exit(1)
 
 
+async def get_stocks(domain: str, auth_token: str) -> None:
+    """Get and display stocks."""
+    from .schema import YangoStockShelfType
+    
+    client = YangoClient(domain=domain, auth_token=auth_token)
+    try:
+        stocks = await client.get_all_stocks()
+        total_products = sum(len(store_stock) for store_stock in stocks.values())
+        print(f'Found {len(stocks)} stores with {total_products} products in stock:')
+        for store_id, store_stock in stocks.items():
+            print(f'  - {store_id} ({len(store_stock)} products):')
+            for product_id, stock in store_stock.items():
+                print(f'    - Product Id: {product_id}')
+                print(f'      Quantity: {stock.quantity}')
+                if isinstance(stock.shelf_type, YangoStockShelfType):
+                    shelf_type_str = stock.shelf_type.value
+                else:
+                    shelf_type_str = str(stock.shelf_type)
+                print(f'      Shelf type: {shelf_type_str}')
+    except Exception as e:
+        print(f'Error getting stocks: {e}', file=sys.stderr)
+        sys.exit(1)
+
+
 async def get_order_detail(domain: str, auth_token: str, order_id: str) -> None:
     """Get and display order details."""
     client = YangoClient(domain=domain, auth_token=auth_token)
@@ -134,6 +158,9 @@ Examples:
     products_parser = subparsers.add_parser('products', help='Get products')
     products_parser.add_argument('--all', action='store_true', help='Include inactive products')
 
+    # Stocks command
+    subparsers.add_parser('stocks', help='Get stocks')
+
     # Order command
     order_parser = subparsers.add_parser('order', help='Get order details')
     order_parser.add_argument('--order-id', required=True, help='Order ID to retrieve')
@@ -159,6 +186,8 @@ Examples:
         asyncio.run(get_stores(args.domain, args.token))
     elif args.command == 'products':
         asyncio.run(get_products(args.domain, args.token, not args.all))
+    elif args.command == 'stocks':
+        asyncio.run(get_stocks(args.domain, args.token))
     elif args.command == 'order':
         asyncio.run(get_order_detail(args.domain, args.token, args.order_id))
     elif args.command == '3pl-events':

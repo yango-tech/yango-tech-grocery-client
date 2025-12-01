@@ -249,6 +249,14 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
         data: dict[str, Any] = {'store_id': wms_store_id, 'stocks': [asdict(stock) for stock in stocks]}
         await self.yango_request(STOCK_INITIALIZE_ENDPOINT, data)
 
+    async def get_stocks(self, cursor: str | None = None) -> dict[str, Any]:
+        data: dict[str, Any] = {}
+
+        if cursor is not None:
+            data['cursor'] = cursor
+
+        return await self.yango_request(STOCK_GET_ENDPOINT, data)
+
     async def get_stock_updates(self, cursor: str | None = None) -> AsyncGenerator[YangoStockDataWithStore, None]:
         """
         Returns an async generator that yields stock updates from WMS, starting from the cursor.

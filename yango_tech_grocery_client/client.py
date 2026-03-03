@@ -60,6 +60,7 @@ from .schema import (
     YangoStockChangeData,
     YangoStockUpdateMode,
     YangoStoreRecord,
+    YangoProductMediaResponse,
 )
 
 logger = logging.getLogger(SERVICE_NAME)
@@ -129,7 +130,7 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
         order_id: str | None = None,
         client_fields: list[YangoReceiptClientField] | None = None,
     ) -> YangoGetReceiptResponse:
-        data = {}
+        data: dict[str, Any] = {}
 
         if receipt_id and order_id:
             # according to Yango API
@@ -226,9 +227,10 @@ class YangoClient(YangoThirdPartyLogisticsClient, YangoPricesClient):
 
         logger.info(f'{created_product_count} products are created')
 
-    async def create_product_media(self, media: YangoProductMedia) -> None:
+    async def create_product_media(self, media: YangoProductMedia) -> YangoProductMediaResponse:
         request_data = asdict(media)
-        await self.yango_multipart_request(PRODUCT_MEDIA_CREATE_ENDPOINT, data=request_data)
+        response = await self.yango_multipart_request(PRODUCT_MEDIA_CREATE_ENDPOINT, data=request_data)
+        return from_dict(YangoProductMediaResponse, response)
 
     async def update_stocks(self, wms_store_id: str, stocks: list[YangoStockData]) -> None:
         updated_stocks_count = 0

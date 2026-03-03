@@ -386,6 +386,10 @@ class YangoProductMedia:
     media_type: YangoMediaType | str
     position: YangoMediaPosition | str
 
+@dataclass
+class YangoProductMediaResponse:
+    media_id: str
+
 
 @dataclass
 class YangoDiscountRecord:

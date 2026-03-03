@@ -74,27 +74,3 @@ The package version is managed in `pyproject.toml`. To update the version:
 4. Add tests for new functionality
 5. Ensure all tests pass
 6. Submit a pull request
-
-## Project Structure
-
-```
-yango-tech-grocery-client/
-├── yango_tech_grocery_client/     # Main package directory
-│   ├── __init__.py               # Package initialization
-│   ├── base_client.py            # Base client functionality
-│   ├── client.py                 # Main client implementation
-│   ├── constants.py              # Constants and enums
-│   ├── endpoints.py              # API endpoint definitions
-│   ├── exceptions.py             # Custom exceptions
-│   ├── prices.py                 # Price-related functionality
-│   ├── schema.py                 # Data models and schemas
-│   ├── utils.py                  # Utility functions
-│   └── py.typed                  # Type checking support
-├── tests/                        # Test files
-├── pyproject.toml                # Project configuration
-├── poetry.lock                   # Dependency lock file
-├── README.md                     # User documentation
-├── EXAMPLES.md                   # Usage examples
-├── DEVELOPMENT.md                # This file
-└── LICENSE                       # License file
-```

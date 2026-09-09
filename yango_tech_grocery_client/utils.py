@@ -22,7 +22,7 @@ def retry_request(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
             try:
                 return await func(*args, **kwargs)
             except YangoRequestError as e:
-                if e.status in ERROR_STATUSES_FOR_RETRY and retries <= MAX_RETRIES:
+                if e.status in ERROR_STATUSES_FOR_RETRY and retries < MAX_RETRIES:
                     retries += 1
                     logger.info(f'Request error {e.status} for {e.url}. {retries} attempt')
                     await asyncio.sleep(RETRY_DELAY)
